@@ -26,9 +26,6 @@
 # For auditable supply chains with no third-party repositories, use
 # Dockerfile.system instead — every binary comes from Ubuntu's apt.
 #
-# For the alternate Dockerfile using only Ubuntu's apt packages,
-# see Dockerfile.system.
-#
 # Purpose
 # -------
 # Reproducible development environment for:
@@ -133,7 +130,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-venv \
     ripgrep \
     rsync \
-    software-properties-common \
     strace \
     sudo \
     tzdata \
@@ -255,7 +251,7 @@ COPY USER_GUIDE.md /usr/share/doc/dev-container-cpp/USER_GUIDE.md
 # ----------------------------------------------------------------------------
 # Install vcpkg (C++ package manager)
 # ----------------------------------------------------------------------------
-RUN git clone https://github.com/microsoft/vcpkg.git /opt/vcpkg \
+RUN git clone --depth 1 https://github.com/microsoft/vcpkg.git /opt/vcpkg \
  && /opt/vcpkg/bootstrap-vcpkg.sh -disableMetrics \
  && ln -s /opt/vcpkg/vcpkg /usr/local/bin/vcpkg \
  && chown -R "${USER_UID}:${USER_GID}" /opt/vcpkg
