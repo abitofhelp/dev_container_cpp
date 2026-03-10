@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-03-10
+
+### Added
+
+- ARM Cortex-A Linux cross-compiler (`gcc-arm-linux-gnueabihf`,
+  `libc6-dev-armhf-cross`) for STM32MP135F and similar Cortex-A7 boards
+  running Linux.
+- "Embedded Board Support" section in README documenting both supported
+  boards (STM32F769I bare-metal, STM32MP135F Linux).
+- Updated USER_GUIDE §0.4 with embedded board support table.
+- Updated component source tables in README with `arm-linux-gnueabihf-gcc`.
+- Verification step in both Dockerfiles for the Linux cross-compiler.
+
 ## [1.0.0] - 2026-03-09
 
 ### Changed

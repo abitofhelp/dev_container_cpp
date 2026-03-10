@@ -30,7 +30,7 @@
 # -------
 # Reproducible development environment for:
 #   • Desktop C/C++ development (GCC 13, Clang from LLVM repo)
-#   • Embedded C/C++ development (ARM Cortex-M cross-compiler)
+#   • Embedded C/C++ development (ARM Cortex-M bare-metal, ARM Cortex-A Linux)
 #   • Build systems: CMake (latest), Ninja, Meson, Make
 #   • Package management: vcpkg
 #   • Static analysis: clang-tidy, clang-format, cppcheck
@@ -159,12 +159,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gdb-multiarch \
     valgrind \
     # ------------------------------------------------------------------
-    # Embedded: ARM Cortex-M cross-compiler and tools
+    # Embedded: ARM Cortex-M bare-metal cross-compiler and tools
     # ------------------------------------------------------------------
     gcc-arm-none-eabi \
     libnewlib-arm-none-eabi \
     openocd \
     stlink-tools \
+    # ------------------------------------------------------------------
+    # Embedded: ARM Cortex-A Linux cross-compiler (STM32MP1)
+    # ------------------------------------------------------------------
+    gcc-arm-linux-gnueabihf \
+    libc6-dev-armhf-cross \
     # ------------------------------------------------------------------
     # Static analysis and build acceleration
     # ------------------------------------------------------------------
@@ -281,8 +286,11 @@ RUN echo "" \
  && ninja --version \
  && meson --version \
  && echo "" \
- && echo "=== Embedded toolchain ===" \
+ && echo "=== Embedded toolchain (bare-metal) ===" \
  && arm-none-eabi-gcc --version | head -1 \
+ && echo "" \
+ && echo "=== Embedded toolchain (Linux cross) ===" \
+ && arm-linux-gnueabihf-gcc --version | head -1 \
  && echo "" \
  && echo "=== Analysis tools ===" \
  && clang-tidy --version | head -1 \

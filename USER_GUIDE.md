@@ -67,9 +67,18 @@ Regardless of which Dockerfile you choose:
 
 ### 0.4 Embedded development
 
-Both images include the ARM Cortex-M cross-compiler (`arm-none-eabi-gcc`),
-OpenOCD, stlink-tools, and gdb-multiarch for embedded STM32 development. For
-ST's proprietary tools (STM32CubeCLT, STM32CubeMX), see the "STM32 Custom
+Both images include toolchains for two embedded development workflows:
+
+| Board | SoC | Core | Runtime | Cross-compiler |
+|-------|-----|------|---------|----------------|
+| STM32F769I Discovery | STM32F769NI | Cortex-M7 | Bare metal | `arm-none-eabi-gcc` |
+| STM32MP135F Discovery | STM32MP135F | Cortex-A7 | Linux | `arm-linux-gnueabihf-gcc` |
+
+The bare-metal toolchain includes OpenOCD, stlink-tools, and gdb-multiarch for
+flashing and debugging. The Linux cross-compiler includes the full sysroot
+(`libc6-dev-armhf-cross`) for building Linux userspace applications.
+
+For ST's proprietary tools (STM32CubeCLT, STM32CubeMX), see the "STM32 Custom
 Image" section in [README.md](README.md#stm32-custom-image).
 
 ---
@@ -366,9 +375,11 @@ image.
 2. **Package manager**: vcpkg (upstream image only). CMake-native
    integration, no Python dependency, 2300+ packages. **Decided.**
 
-3. **Embedded tools**: arm-none-eabi-gcc, OpenOCD, stlink-tools, gdb-multiarch
-   included in both images. STM32Cube tools excluded (GUI-based, require ST
-   login); documented as custom image option. **Decided.**
+3. **Embedded tools**: arm-none-eabi-gcc (bare-metal) and
+   arm-linux-gnueabihf-gcc (Linux cross) for STM32F769I and STM32MP135F
+   respectively. OpenOCD, stlink-tools, gdb-multiarch included. STM32Cube
+   tools excluded (GUI-based, require ST login); documented as custom image
+   option. **Decided.**
 
 4. **gosu vs su-exec**: `gosu` — more common in Docker ecosystems, available
    in Ubuntu apt. **Decided.**
@@ -489,10 +500,14 @@ upgrade, update the `apt-get install` and `update-alternatives` lines in
 `Dockerfile.system`. Update the `system-gcc-13-clang-XX` tag in
 `.github/workflows/docker-publish.yml` to match.
 
-### 13.7 ARM cross-compiler
+### 13.7 ARM cross-compilers
 
-The ARM cross-compiler (`gcc-arm-none-eabi`) is installed from Ubuntu's apt
-repository. Version updates come with Ubuntu package updates.
+Both ARM cross-compilers are installed from Ubuntu's apt repository:
+
+- `gcc-arm-none-eabi` — bare-metal (Cortex-M, STM32F769I)
+- `gcc-arm-linux-gnueabihf` — Linux (Cortex-A, STM32MP135F)
+
+Version updates come with Ubuntu package updates.
 
 ### 13.8 Checklist
 

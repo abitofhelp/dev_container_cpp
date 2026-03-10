@@ -35,6 +35,7 @@ Both images use Ubuntu 24.04 and support amd64 + arm64 multi-arch builds.
 | vcpkg | git clone + bootstrap | Y | Y | latest |
 | GDB | apt | Y | Y | system |
 | arm-none-eabi-gcc | apt | Y | Y | 13.2 |
+| arm-linux-gnueabihf-gcc | apt | Y | Y | system |
 | gdb-multiarch | apt | Y | Y | system |
 | OpenOCD | apt | Y | Y | system |
 | stlink-tools | apt | Y | Y | system |
@@ -59,6 +60,7 @@ Both images use Ubuntu 24.04 and support amd64 + arm64 multi-arch builds.
 | Catch2 | apt | Y | Y | v3 |
 | GDB | apt | Y | Y | system |
 | arm-none-eabi-gcc | apt | Y | Y | 13.2 |
+| arm-linux-gnueabihf-gcc | apt | Y | Y | system |
 | gdb-multiarch | apt | Y | Y | system |
 | OpenOCD | apt | Y | Y | system |
 | stlink-tools | apt | Y | Y | system |
@@ -122,7 +124,9 @@ parallels@container /workspace (main) [ctr:rootless]
 - Multi-architecture support (`linux/amd64` + `linux/arm64`) for both images
 - Two Dockerfile variants: upstream toolchains and system-only toolchains
 - Desktop C/C++ development (GCC 13, Clang 20 or 18)
-- Embedded C/C++ development (ARM Cortex-M cross-compiler)
+- Embedded C/C++ development:
+  - ARM Cortex-M bare-metal (STM32F769I and similar)
+  - ARM Cortex-A Linux cross-compilation (STM32MP135F and similar)
 - Build systems: CMake, Ninja, Meson, Make
 - Package management: vcpkg (upstream image only)
 - Static analysis: clang-tidy, clang-format, cppcheck
@@ -153,7 +157,8 @@ identical.
 | **Static analysis** | clang-tidy, clang-format, cppcheck |
 | **Build acceleration** | ccache |
 | **Debuggers / profiling** | gdb, lldb, valgrind, strace, gcov, gcov-tool |
-| **Embedded** | arm-none-eabi-gcc, gdb-multiarch, openocd, stlink-tools, libnewlib-arm-none-eabi |
+| **Embedded (bare-metal)** | arm-none-eabi-gcc, libnewlib-arm-none-eabi, gdb-multiarch, openocd, stlink-tools |
+| **Embedded (Linux cross)** | arm-linux-gnueabihf-gcc, libc6-dev-armhf-cross |
 | **Testing** | Catch2 (system image via apt; upstream image via vcpkg) |
 | **Compiler infrastructure** | ld, lld, as, ar, nm, objcopy, objdump, ranlib, readelf, size, strings, strip, addr2line |
 | **Version control** | git, patch, openssh-client (ssh, scp) |
@@ -167,12 +172,23 @@ identical.
 | **Shell** | zsh (default), bash, zsh-autosuggestions, zsh-syntax-highlighting |
 | **Container** | gosu, sudo |
 
+## Embedded Board Support
+
+Both images include toolchains for two embedded development workflows:
+
+| Board | SoC | Core | Runtime | Cross-compiler |
+|-------|-----|------|---------|----------------|
+| STM32F769I Discovery | STM32F769NI | Cortex-M7 | Bare metal | `arm-none-eabi-gcc` |
+| STM32MP135F Discovery | STM32MP135F | Cortex-A7 | Linux | `arm-linux-gnueabihf-gcc` |
+
+The bare-metal toolchain includes OpenOCD, stlink-tools, and gdb-multiarch for
+flashing and debugging. The Linux cross-compiler includes the full sysroot
+(`libc6-dev-armhf-cross`) for building Linux userspace applications.
+
 ## STM32 Custom Image
 
-The base images include the ARM Cortex-M cross-compiler (`arm-none-eabi-gcc`),
-OpenOCD, and stlink-tools for embedded development. For projects that require
-ST's proprietary tools, developers can build a custom image on top of these
-base images.
+For projects that require ST's proprietary tools, developers can build a custom
+image on top of these base images.
 
 ST provides a command-line installer (STM32CubeCLT) that bundles their
 toolchain, STM32CubeProgrammer, and build integration:
