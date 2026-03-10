@@ -8,7 +8,7 @@
 
 # User Guide: dev_container_cpp
 
-**Version**: 1.0.0-rc1
+**Version**: 1.0.0
 **Date**: 2026-03-09
 **Authors**: Michael Gardner, Claude (Anthropic), GPT (OpenAI)
 

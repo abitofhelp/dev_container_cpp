@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-03-09
+
+### Changed
+
+- Clarified two-image rationale: the deciding factor is supply chain
+  auditability (system image uses only Canonical-signed apt packages), not
+  features. Updated README, USER_GUIDE, and both Dockerfile headers.
+
+### Fixed
+
+- Removed duplicate "see Dockerfile.system" comment in Dockerfile header.
+- Removed unused `software-properties-common` package from upstream Dockerfile
+  (GPG keys are handled directly via `gpg --dearmor`).
+- Added `--depth 1` to vcpkg `git clone` to save ~200MB of history during build.
+
+### Verified
+
+- Upstream image: nerdctl rootless (Ubuntu VM amd64), Docker rootful (macOS
+  Intel amd64). Both passed.
+- System image: nerdctl rootless (Ubuntu VM amd64), Docker rootful (macOS
+  Intel amd64). Both passed.
+
 ## [1.0.0-rc1] - 2026-03-09
 
 ### Added
