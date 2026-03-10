@@ -17,9 +17,10 @@
 # No external package repositories are added.
 #
 # Recommended for:
-#   • Teams that want compiler updates tied to Ubuntu's release cycle
+#   • Organizations requiring auditable supply chains — every binary is
+#     built, signed, and distributed by Canonical via Ubuntu's apt
 #   • CI/CD pipelines that need stable, reproducible builds
-#   • Developers who prefer minimal external dependencies
+#   • Teams whose policies prohibit third-party package repositories
 #
 # For the default Dockerfile using upstream LLVM + Kitware CMake + vcpkg,
 # see Dockerfile.

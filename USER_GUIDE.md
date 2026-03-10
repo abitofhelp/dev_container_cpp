@@ -18,26 +18,33 @@
 
 ### 0.1 Why there are two Dockerfiles
 
-C++ projects benefit from the latest compiler features (C++20/23/26 support),
-the newest static analysis tools (clang-tidy checks), and up-to-date build
-systems (CMake 4.x). The upstream image provides these by adding the official
-LLVM APT repository, Kitware's CMake repository, and vcpkg for package
-management.
+The core difference is **supply chain auditability**, not features.
 
-At the same time, some teams prefer everything from Ubuntu's apt repositories
-with no external dependencies — fewer moving parts, predictable updates tied
-to Ubuntu's release cycle.
+The **system image** installs every package from Ubuntu's apt repositories —
+no external sources. Every binary is built, signed, and distributed by
+Canonical. Organizations that require auditable supply chains, reproducible
+builds tied to a distribution's release cycle, or compliance with packaging
+policies that prohibit third-party repositories should use this image.
 
-Rather than declare one approach wrong, this project ships both:
+The **upstream image** adds three external repositories: LLVM's official APT
+repository (Clang 20), Kitware's APT repository (CMake 4.x), and vcpkg
+(Microsoft's C++ package manager). These provide the latest compiler features
+(C++23/26 support), the newest clang-tidy checks, and access to 2300+ C++
+libraries via vcpkg. The trade-off is that builds depend on sources outside
+Ubuntu's package pipeline.
 
-| Dockerfile | Base | Compiler source | Architectures | Image name |
-|------------|------|-----------------|---------------|------------|
-| `Dockerfile` (default) | Ubuntu 24.04 | LLVM repo Clang 20, Kitware CMake, vcpkg | amd64, arm64 | `dev-container-cpp` |
-| `Dockerfile.system` | Ubuntu 24.04 | Ubuntu apt packages only | amd64, arm64 | `dev-container-cpp-system` |
+Both images are functionally equivalent for C++20 development. Both support
+amd64 + arm64. Both include the same embedded toolchain, debuggers, and
+general developer tools.
 
-**Start with the default.** It gives you the latest C++ compiler features and
-vcpkg for dependency management. Switch to `Dockerfile.system` if you prefer
-Ubuntu's packaged compilers and want no external repository dependencies.
+| Dockerfile | Compiler source | External repos | Image name |
+|------------|-----------------|:--------------:|------------|
+| `Dockerfile` (default) | LLVM repo Clang 20, Kitware CMake 4.x, vcpkg | 3 | `dev-container-cpp` |
+| `Dockerfile.system` | Ubuntu apt packages only (Clang 18, CMake 3.28) | 0 | `dev-container-cpp-system` |
+
+**Choose by policy, not preference.** If your organization requires that all
+binaries come from your distribution's package pipeline, use `Dockerfile.system`.
+Otherwise, start with the default for the latest tooling.
 
 ### 0.2 Supported architectures
 
@@ -507,9 +514,9 @@ release. Remove or update entries as they are verified.
 | Area                              | Status       | Notes                                                        |
 |-----------------------------------|--------------|--------------------------------------------------------------|
 | Rootless nerdctl (local)          | Verified     | Ubuntu 24.04 base, nerdctl. Build + smoke test passed.       |
-| Docker rootful (macOS)            | Pending      | Not yet tested.                                              |
-| GitHub Actions build workflow     | Pending      | Not yet tested (no push to GitHub yet).                      |
-| GitHub Actions publish workflow   | Pending      | Not yet tested (no push to GitHub yet).                      |
+| Docker rootful (macOS)            | Verified     | macOS Intel host, Docker. Build + smoke test passed.         |
+| GitHub Actions build workflow     | Pending      | Not yet tested.                                              |
+| GitHub Actions publish workflow   | Pending      | Not yet tested.                                              |
 | Podman rootless (local)           | Blocked      | `--userns=keep-id` fails in Parallels VM (kernel restriction). |
 | Kubernetes deployment             | Not tested   | Image is designed to be compatible; no cluster available.    |
 
@@ -518,9 +525,9 @@ release. Remove or update entries as they are verified.
 | Area                              | Status       | Notes                                                        |
 |-----------------------------------|--------------|--------------------------------------------------------------|
 | Rootless nerdctl (local)          | Verified     | Ubuntu 24.04 base, nerdctl. Build + smoke test passed.       |
-| Docker rootful (macOS)            | Pending      | Not yet tested.                                              |
-| GitHub Actions build workflow     | Pending      | Not yet tested (no push to GitHub yet).                      |
-| GitHub Actions publish workflow   | Pending      | Not yet tested (no push to GitHub yet).                      |
+| Docker rootful (macOS)            | Verified     | macOS Intel host, Docker. Build + smoke test passed.         |
+| GitHub Actions build workflow     | Pending      | Not yet tested.                                              |
+| GitHub Actions publish workflow   | Pending      | Not yet tested.                                              |
 | Podman rootless (local)           | Blocked      | `--userns=keep-id` fails in Parallels VM (kernel restriction). |
 | Kubernetes deployment             | Not tested   | Image is designed to be compatible; no cluster available.    |
 

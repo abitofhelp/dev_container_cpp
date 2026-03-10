@@ -20,9 +20,11 @@
 #   • ARM cross-compiler for embedded development
 #
 # Recommended for:
-#   • Developers who need the latest C++20/23/26 compiler features
+#   • Teams that want the latest C++20/23/26 compiler features and tooling
 #   • Projects using vcpkg for dependency management
-#   • Teams that want the newest static analysis tools (clang-tidy)
+#
+# For auditable supply chains with no third-party repositories, use
+# Dockerfile.system instead — every binary comes from Ubuntu's apt.
 #
 # For the alternate Dockerfile using only Ubuntu's apt packages,
 # see Dockerfile.system.

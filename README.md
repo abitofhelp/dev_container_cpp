@@ -70,8 +70,8 @@ Both images use Ubuntu 24.04 and support amd64 + arm64 multi-arch builds.
 
 | Image | Ubuntu VM (amd64) | macOS Intel (amd64) | MacBook Pro (arm64) |
 |-------|:---:|:---:|:---:|
-| `dev-container-cpp` | Passed | Pending | Pending |
-| `dev-container-cpp-system` | Passed | Pending | Pending |
+| `dev-container-cpp` | Passed | Passed | Pending |
+| `dev-container-cpp-system` | Passed | Passed | Pending |
 
 ## Image Names
 
@@ -89,11 +89,12 @@ This repository ships two Dockerfiles representing two valid toolchain strategie
 | `Dockerfile` (default) | Ubuntu 24.04 | LLVM repo Clang 20, Kitware CMake, vcpkg | amd64, arm64 | `dev-container-cpp` |
 | `Dockerfile.system` | Ubuntu 24.04 | Ubuntu apt packages only | amd64, arm64 | `dev-container-cpp-system` |
 
-**Which should I use?** Start with the default (`Dockerfile`) for the latest
-C++20/23/26 compiler features, newest static analysis tools, and vcpkg package
-management. Use `Dockerfile.system` if you prefer everything from Ubuntu's apt
-repositories with no external dependencies. See USER_GUIDE §0 for detailed
-rationale.
+**Which should I use?** The deciding factor is **supply chain auditability**.
+The system image installs everything from Ubuntu's apt repositories — every
+binary is built, signed, and distributed by Canonical. Use it when your
+organization requires auditable supply chains with no third-party repositories.
+The default image adds LLVM, Kitware, and vcpkg repositories for the latest
+tooling. See USER_GUIDE §0 for detailed rationale.
 
 ## Why This Container Is Useful
 
