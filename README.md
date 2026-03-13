@@ -2,7 +2,7 @@
 
 [![Build](https://github.com/abitofhelp/dev_container_cpp/actions/workflows/docker-build.yml/badge.svg)](https://github.com/abitofhelp/dev_container_cpp/actions/workflows/docker-build.yml) [![Publish](https://github.com/abitofhelp/dev_container_cpp/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/abitofhelp/dev_container_cpp/actions/workflows/docker-publish.yml) [![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD--3--Clause-blue.svg)](LICENSE) [![GCC](https://img.shields.io/badge/GCC-13-6f42c1)](#pre-installed-tools) [![Clang](https://img.shields.io/badge/Clang-20-6f42c1)](#pre-installed-tools) [![Container](https://img.shields.io/badge/container-ghcr.io%2Fabitofhelp%2Fdev--container--cpp-0A66C2)](#image-names)
 
-Professional C++ development container for desktop and embedded (ARM Cortex-M/A) development.
+Professional C++ development container for desktop and embedded (ARM Cortex-M/A) platforms.
 
 ## Supported Architectures
 
