@@ -44,9 +44,20 @@ HOST_UID         ?= $(shell id -u)
 HOST_GID         ?= $(shell id -g)
 
 # ----------------------------------------------------------------------------
-# Container CLI (override with CONTAINER_CLI=docker)
+# Container CLI — auto-detected: macOS/Windows -> docker, Linux -> nerdctl.
+# Override: make build CONTAINER_CLI=docker
 # ----------------------------------------------------------------------------
-CONTAINER_CLI    ?= nerdctl
+CONTAINER_CLI    ?= $(shell case "$$(uname -s)" in Darwin|MINGW*|MSYS*|CYGWIN*) echo docker ;; *) echo nerdctl ;; esac)
+
+# ----------------------------------------------------------------------------
+# Container launcher (shared Python script).
+# Override: HYBRID_SCRIPTS_PYTHON=/path/to/repo make run
+# ----------------------------------------------------------------------------
+SCRIPTS_PYTHON   ?= $(shell \
+    if [ -n "$$HYBRID_SCRIPTS_PYTHON" ]; then echo "$$HYBRID_SCRIPTS_PYTHON"; \
+    elif [ "$$(uname)" = "Darwin" ]; then echo "$$HOME/Ada/github.com/abitofhelp/hybrid_scripts_python"; \
+    else echo "$$HOME/ada/github.com/abitofhelp/hybrid_scripts_python"; fi)
+CONTAINER_RUN    := python3 $(SCRIPTS_PYTHON)/makefile/container_run.py
 
 .PHONY: help
 help:
@@ -102,7 +113,8 @@ help:
 	@echo "  compress             Create a compressed source archive from HEAD"
 	@echo ""
 	@echo "Variables:"
-	@echo "  CONTAINER_CLI        Container CLI to use (default: nerdctl)"
+	@echo "  CONTAINER_CLI        Container CLI (auto-detected; override with CONTAINER_CLI=docker)"
+	@echo "  SCRIPTS_PYTHON       Path to hybrid_scripts_python (auto-detected; override with HYBRID_SCRIPTS_PYTHON=...)"
 	@echo "  HOST_USER            Host username (default: $$(whoami))"
 	@echo "  HOST_UID             Host user ID (default: $$(id -u))"
 	@echo "  HOST_GID             Host group ID (default: $$(id -g))"
@@ -147,65 +159,31 @@ build-system-no-cache:
 		-t $(SYSTEM_IMAGE_NAME) .
 
 # ----------------------------------------------------------------------------
-# Run targets
+# Run targets (delegated to container_run.py for CLI detection + naming)
 # ----------------------------------------------------------------------------
 .PHONY: run
 run:
-	$(CONTAINER_CLI) run -it --rm \
-		-e HOST_UID=$(HOST_UID) \
-		-e HOST_GID=$(HOST_GID) \
-		-e HOST_USER=$(HOST_USER) \
-		-v "$(CURDIR)":/workspace \
-		-w /workspace \
-		$(IMAGE_NAME)
+	@$(CONTAINER_RUN) --image $(IMAGE_NAME) --source "$(CURDIR)"
 
 .PHONY: run-root
 run-root:
-	$(CONTAINER_CLI) run -it --rm \
-		--entrypoint /usr/bin/zsh \
-		-u 0 \
-		-v "$(CURDIR)":/workspace \
-		-w /workspace \
-		$(IMAGE_NAME)
+	@$(CONTAINER_RUN) --image $(IMAGE_NAME) --source "$(CURDIR)" --root
 
 .PHONY: run-shell
 run-shell:
-	$(CONTAINER_CLI) run -it --rm \
-		-e HOST_UID=$(HOST_UID) \
-		-e HOST_GID=$(HOST_GID) \
-		-e HOST_USER=$(HOST_USER) \
-		-v "$(CURDIR)":/workspace \
-		-w /home/$(HOST_USER) \
-		$(IMAGE_NAME)
+	@$(CONTAINER_RUN) --image $(IMAGE_NAME) --source "$(CURDIR)" --workdir /home/$(HOST_USER)
 
 .PHONY: run-system
 run-system:
-	$(CONTAINER_CLI) run -it --rm \
-		-e HOST_UID=$(HOST_UID) \
-		-e HOST_GID=$(HOST_GID) \
-		-e HOST_USER=$(HOST_USER) \
-		-v "$(CURDIR)":/workspace \
-		-w /workspace \
-		$(SYSTEM_IMAGE_NAME)
+	@$(CONTAINER_RUN) --image $(SYSTEM_IMAGE_NAME) --source "$(CURDIR)"
 
 .PHONY: run-root-system
 run-root-system:
-	$(CONTAINER_CLI) run -it --rm \
-		--entrypoint /usr/bin/zsh \
-		-u 0 \
-		-v "$(CURDIR)":/workspace \
-		-w /workspace \
-		$(SYSTEM_IMAGE_NAME)
+	@$(CONTAINER_RUN) --image $(SYSTEM_IMAGE_NAME) --source "$(CURDIR)" --root
 
 .PHONY: run-shell-system
 run-shell-system:
-	$(CONTAINER_CLI) run -it --rm \
-		-e HOST_UID=$(HOST_UID) \
-		-e HOST_GID=$(HOST_GID) \
-		-e HOST_USER=$(HOST_USER) \
-		-v "$(CURDIR)":/workspace \
-		-w /home/$(HOST_USER) \
-		$(SYSTEM_IMAGE_NAME)
+	@$(CONTAINER_RUN) --image $(SYSTEM_IMAGE_NAME) --source "$(CURDIR)" --workdir /home/$(HOST_USER)
 
 # ----------------------------------------------------------------------------
 # Test targets
@@ -345,11 +323,11 @@ docker-build-system:
 
 .PHONY: docker-run
 docker-run:
-	$(MAKE) run CONTAINER_CLI=docker
+	@$(CONTAINER_RUN) --image $(IMAGE_NAME) --source "$(CURDIR)" --cli docker
 
 .PHONY: docker-run-system
 docker-run-system:
-	$(MAKE) run-system CONTAINER_CLI=docker
+	@$(CONTAINER_RUN) --image $(SYSTEM_IMAGE_NAME) --source "$(CURDIR)" --cli docker
 
 # ----------------------------------------------------------------------------
 # Podman convenience aliases
@@ -376,19 +354,11 @@ podman-build-system:
 
 .PHONY: podman-run
 podman-run:
-	podman run -it --rm \
-		--userns=keep-id \
-		-v "$(CURDIR)":/workspace \
-		-w /workspace \
-		$(IMAGE_NAME)
+	@$(CONTAINER_RUN) --image $(IMAGE_NAME) --source "$(CURDIR)" --cli podman
 
 .PHONY: podman-run-system
 podman-run-system:
-	podman run -it --rm \
-		--userns=keep-id \
-		-v "$(CURDIR)":/workspace \
-		-w /workspace \
-		$(SYSTEM_IMAGE_NAME)
+	@$(CONTAINER_RUN) --image $(SYSTEM_IMAGE_NAME) --source "$(CURDIR)" --cli podman
 
 # ----------------------------------------------------------------------------
 # Image management
@@ -400,6 +370,7 @@ inspect:
 	@echo "IMAGE_REF          = $(IMAGE_REF)"
 	@echo "SYSTEM_IMAGE_REF   = $(SYSTEM_IMAGE_REF)"
 	@echo "CONTAINER_CLI      = $(CONTAINER_CLI)"
+	@echo "SCRIPTS_PYTHON     = $(SCRIPTS_PYTHON)"
 	@echo "HOST_USER          = $(HOST_USER)"
 	@echo "HOST_UID           = $(HOST_UID)"
 	@echo "HOST_GID           = $(HOST_GID)"
